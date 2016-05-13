@@ -25,73 +25,30 @@ def cprint(*args, **kwargs):
     if OUTPUT:
         print(*args, **kwargs)
 
-# def get_frequency_with_peak_amplitude(wave_file):
-#     ''' Returns the frequency (Hz) at the peak amplitude of a fourier transform.  This is essentially the most-used
-#         frequency in *wave_file*.
-#         wave_file is an open file-like object
-#     '''
-#     rate, data = scipy.io.wavfile.read(wave_file)
-#     duration = len(data) / float(rate)
-#     cprint('rate: {}, len(data): {}, duration: {}s'.format(rate, len(data), duration))
-#     cprint('data[:10]: {}'.format(data))
-#     freq_amplitudes = numpy.abs(numpy.fft.fft(data))
-#     max_freq_amplitude = numpy.max(freq_amplitudes[:len(freq_amplitudes) / 2])
-#     index_with_max_amplitude = numpy.argmax(freq_amplitudes[:len(freq_amplitudes) / 2])
-#     freq_with_max_amplitude = index_with_max_amplitude / duration
-#     cprint('len(feq_amplitudes): {}'.format(len(freq_amplitudes)))
-#     cprint('max freq amplitude: {}'.format(max_freq_amplitude))
-#     cprint('index of max freq amplitude: {}'.format(index_with_max_amplitude))
-#     cprint('freq @max amplitude: {}'.format(freq_with_max_amplitude))
-#     return freq_with_max_amplitude
-
-def get_frequency_with_peak_amplitude(wave_data, sampling_rate):
+def get_frequency_with_peak_amplitude(wave_data, sampling_rate, min_freq=150, max_freq=8000):
     ''' Returns the frequency (Hz) at the peak amplitude of a fourier transform.  This is the most-used
         frequency in *wave_data*.
         wave_data is a numpy array containing PCM encoded sound data.
     '''
     duration = len(wave_data) / float(sampling_rate)
     cprint('rate: {}, len(data): {}, duration: {}s'.format(sampling_rate, len(wave_data), duration))
-    cprint('data[:10]: {}'.format(wave_data))
     freq_amplitudes = numpy.abs(numpy.fft.fft(wave_data))
-    max_freq_amplitude = numpy.max(freq_amplitudes[:len(freq_amplitudes) / 2])
-    index_with_max_amplitude = numpy.argmax(freq_amplitudes[:len(freq_amplitudes) / 2])
-    freq_with_max_amplitude = index_with_max_amplitude / duration
+    # Due to symmetry of fft transform on signal, only consider half of result.
+    candidate_amplitudes = freq_amplitudes[:len(freq_amplitudes + 1) / 2]
+    # Zero-out frequencies below min or above max so they aren't considered.
+    while True:
+        max_freq_amplitude = numpy.max(candidate_amplitudes)
+        index_with_max_amplitude = numpy.argmax(candidate_amplitudes)
+        freq_with_max_amplitude = index_with_max_amplitude / duration
+        if freq_with_max_amplitude >= min_freq and freq_with_max_amplitude <= max_freq:
+            break
+        candidate_amplitudes[index_with_max_amplitude] = 0
+
     cprint('len(feq_amplitudes): {}'.format(len(freq_amplitudes)))
     cprint('max freq amplitude: {}'.format(max_freq_amplitude))
     cprint('index of max freq amplitude: {}'.format(index_with_max_amplitude))
     cprint('freq @max amplitude: {}'.format(freq_with_max_amplitude))
     return freq_with_max_amplitude
-
-def calculate_peak_frequency_all():
-    rss = RecordedSyllable.objects.all()
-    print('Calculating peak amplitude frequency for {} RecordedSyllables'.format(rss.count()))
-    MaxFreq11.objects.all().delete()
-    new_attributes_max = []
-    for rs in rss:
-        if rs.content_as_wav is None:
-            print('no wav...skipping')
-            continue
-
-        sio = StringIO(rs.content_as_wav)
-        sample_rate, wave_data = scipy.io.wavfile.read(sio)
-        try:
-            peak_freq = get_frequency_with_peak_amplitude(wave_data, sample_rate)
-            print('.', end='')
-            sys.stdout.flush()
-        except ValueError as ex:
-            if ex.message == 'Unknown wave file format':
-                print('x', end='')
-                sys.stdout.flush()
-                continue
-            else:
-                raise
-
-        maxf = MaxFreq11(recording=rs, attr=peak_freq)
-        new_attributes_max.append(maxf)
-    print('Saving {} new attributes for {} samples...'.format(len(new_attributes_max), rss.count()), end='')
-    MaxFreq11.objects.bulk_create(new_attributes_max)
-    print('done')
-
 
 def calculate_8_segment_peak_frequency_all():
     rss = RecordedSyllable.objects.all()
@@ -106,12 +63,14 @@ def calculate_8_segment_peak_frequency_all():
     PeakFreq88.objects.all().delete()
 
     new_attributes = defaultdict(list)
+    missing_wav_count = 0
     for rs in rss:
-        if rs.content_as_wav is None:
+        if rs.content_as_silence_stripped_wav is None:
             print('no wav...skipping')
+            missing_wav_count += 1
             continue
 
-        sio = StringIO(rs.content_as_wav)
+        sio = StringIO(rs.content_as_silence_stripped_wav)
 
         try:
             sample_rate, wave_data = scipy.io.wavfile.read(sio)
@@ -158,6 +117,9 @@ def calculate_8_segment_peak_frequency_all():
         ModelClass = model_classes[i]
         ModelClass.objects.bulk_create(new_attributes[i])
 
+    print('{} RecordedSyllable instances missing content_as_silence_stripped_wav'\
+              .format(missing_wav_count)
+    )
     print('done')
 
 def calculate_8_segment_peak_frequency_change_all():
@@ -193,14 +155,7 @@ def calculate_8_segment_peak_frequency_change_all():
                 sys.stdout.flush()
                 continue
 
-            # Ignore frequency values outside human speach range
-            if attr2 > 150 and attr1 > 150 and attr2 < 8000 and attr1 < 8000:
-                freq_change = attr2 - attr1
-            else:
-                print('-', end='')
-                sys.stdout.flush()
-                continue
-
+            freq_change = attr2 - attr1
             pfc = PFC(recording=rs, attr=freq_change)
             new_attributes[PFC].append(pfc)
             print('.', end='')
@@ -237,7 +192,9 @@ def graph_attribute(attribute_name):
     AttrModel = model_lookup[attribute_name]
     initial_subplot = None
     for tone in range(1, 6):
-        data = [ o.attr for o in AttrModel.objects.filter(recording__syllable__tone=tone) ]
+        data = [ o.attr for o in AttrModel.objects.filter(
+                                  recording__syllable__tone=tone, recording__syllable__sound='ba')
+        ]
         import matplotlib.pyplot as plt
 
         if tone == 1:
@@ -245,7 +202,7 @@ def graph_attribute(attribute_name):
         else:
             plt.subplot(1, 5, tone, sharey=initial_subplot)
 
-        min_value, max_value, bin_width = (-100, 200, 100)
+        min_value, max_value, bin_width = (-100, 100, 10)
         plt.hist(data, range(min_value, max_value, bin_width))
 
         plt.xlabel('attr')
@@ -258,8 +215,6 @@ def graph_attribute(attribute_name):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers()
-    freq1_parser = subparsers.add_parser('frequency1', help='Determine peak frequency for each recorded syllable')
-    freq1_parser.set_defaults(subcommand='frequency1')
     freq8_parser = subparsers.add_parser('frequency8', help='Determine peak frequency for each 1/8th of each recorded syllable ')
     freq8_parser.set_defaults(subcommand='frequency8')
     freqchange8_parser = subparsers.add_parser('freqchange8', help='Determine peak frequency for each 1/8th of each recorded syllable ')
@@ -283,9 +238,7 @@ if __name__ == '__main__':
         , PeakFreq58, PeakFreq68, PeakFreq78, PeakFreq88 \
         , PeakFreqChange28, PeakFreqChange38, PeakFreqChange48 \
         , PeakFreqChange58, PeakFreqChange68, PeakFreqChange78, PeakFreqChange88
-    if args.subcommand == 'frequency1':
-        calculate_peak_frequency_all()
-    elif args.subcommand == 'frequency8':
+    if args.subcommand == 'frequency8':
         calculate_8_segment_peak_frequency_all()
     elif args.subcommand == 'freqchange8':
         calculate_8_segment_peak_frequency_change_all()
