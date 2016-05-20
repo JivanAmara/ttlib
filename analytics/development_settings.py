@@ -19,5 +19,4 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     'hanzi_basics',
     'tonerecorder',
-    'analytics',
 )
