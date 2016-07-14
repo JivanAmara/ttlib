@@ -1,0 +1,5 @@
+
+scipy
+mutagen
+pytaglib    # Requires system-level taglib be installed
+
