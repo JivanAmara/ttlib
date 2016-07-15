@@ -4,11 +4,11 @@ Created on Jun 30, 2016
 @author: jivan
 '''
 from __future__ import print_function
-from analytics.models import Characteristic
+# from analytics.models import Characteristic
 import sys
-from cStringIO import StringIO
+from io import StringIO
 import scipy.io.wavfile
-from analytics.characteristics.generator_base import CharacteristicGenerator
+from ttlib.characteristics.generator_base import CharacteristicGenerator
 from logging import getLogger
 
 logger = getLogger(__name__)

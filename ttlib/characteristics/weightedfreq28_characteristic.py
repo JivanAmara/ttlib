@@ -5,12 +5,12 @@ Created on Jun 30, 2016
 '''
 from __future__ import print_function
 
-from cStringIO import StringIO
+from io import StringIO
 import sys
-from analytics.models import Characteristic
+# from analytics.models import Characteristic
 import scipy.io.wavfile
-from analytics.characteristics.generator_base import CharacteristicGenerator
-from analytics.characteristics.sigfreq_characteristic import SigFreq8
+from ttlib.characteristics.generator_base import CharacteristicGenerator
+from ttlib.characteristics.sigfreq_characteristic import SigFreq8
 from logging import getLogger
 
 logger = getLogger(__name__)

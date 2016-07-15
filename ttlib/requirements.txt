@@ -1,5 +1,8 @@
+# Use the distribution versions if these if you can
+#numpy       # Required by scipy
+#scipy
 
-scipy
 mutagen
 pytaglib    # Requires system-level taglib be installed
 
+dependencies/snack2.2.10/python # Requires system-level python3-tk (Tkinter) is installed

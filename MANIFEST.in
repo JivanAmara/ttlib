@@ -1,1 +1,2 @@
 include README.rst
+include ttlib/consensus_predictor.p

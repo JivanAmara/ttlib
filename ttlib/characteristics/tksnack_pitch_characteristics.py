@@ -5,12 +5,12 @@ Created on Jul 5, 2016
 '''
 from __future__ import print_function, unicode_literals
 import sys
-from Tkinter import Tk
+from tkinter import Tk
 from tempfile import NamedTemporaryFile
-from analytics.models import Characteristic
+# from analytics.models import Characteristic
 from numpy import average
-from tkSnack import initializeSnack, Sound
-from analytics.characteristics.generator_base import CharacteristicGenerator
+from tkSnack3 import initializeSnack, Sound
+from ttlib.characteristics.generator_base import CharacteristicGenerator
 from logging import getLogger
 import scipy.io.wavfile
 

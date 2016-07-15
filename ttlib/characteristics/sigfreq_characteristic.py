@@ -4,11 +4,11 @@ Created on Jun 30, 2016
 @author: jivan
 '''
 from __future__ import print_function
-from analytics.characteristics.generator_base import CharacteristicGenerator
-from analytics.models import Characteristic
-from cStringIO import StringIO
+from ttlib.characteristics.generator_base import CharacteristicGenerator
+# from analytics.models import Characteristic
+from io import StringIO
 import scipy.io.wavfile
-import numpy
+from numpy import abs, fft
 import sys
 
 class SigFreq8(CharacteristicGenerator):
@@ -170,7 +170,7 @@ class SigFreq8(CharacteristicGenerator):
         '''
         duration = len(wave_data) / float(sampling_rate)
 #         cprint('rate: {}, len(data): {}, duration: {}s'.format(sampling_rate, len(wave_data), duration))
-        freq_amplitudes = numpy.abs(numpy.fft.fft(wave_data))
+        freq_amplitudes = abs(fft.fft(wave_data))
         # Due to symmetry of fft transform on signal, only consider half of result.
         candidate_amplitudes = freq_amplitudes[:len(freq_amplitudes + 1) / 2]
 

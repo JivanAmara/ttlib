@@ -3,7 +3,7 @@ Created on Jun 30, 2016
 
 @author: jivan
 '''
-from analytics.characteristics.registry import CharacteristicGeneratorRegistry
+from ttlib.characteristics.registry import CharacteristicGeneratorRegistry
 
 class CharacteristicGenerator(object):
     @classmethod

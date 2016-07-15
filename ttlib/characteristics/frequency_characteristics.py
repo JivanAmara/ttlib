@@ -4,12 +4,12 @@ Created on Jun 30, 2016
 @author: jivan
 '''
 from __future__ import print_function
-from analytics.characteristics.generator_base import CharacteristicGenerator
-from analytics.models import Characteristic
-from cStringIO import StringIO
+from ttlib.characteristics.generator_base import CharacteristicGenerator
+# from analytics.models import Characteristic
+from io import StringIO
 import scipy.io.wavfile
 import sys
-import numpy
+from numpy import abs, max, fft, argmax
 
 cprint = lambda x: None
 
@@ -20,13 +20,13 @@ def get_frequency_with_peak_amplitude(wave_data, sampling_rate, min_freq=150, ma
     '''
     duration = len(wave_data) / float(sampling_rate)
     cprint('rate: {}, len(data): {}, duration: {}s'.format(sampling_rate, len(wave_data), duration))
-    freq_amplitudes = numpy.abs(numpy.fft.fft(wave_data))
+    freq_amplitudes = abs(fft.fft(wave_data))
     # Due to symmetry of fft transform on signal, only consider half of result.
     candidate_amplitudes = freq_amplitudes[:len(freq_amplitudes + 1) / 2]
     # Zero-out frequencies below min or above max so they aren't considered.
     while True:
-        max_freq_amplitude = numpy.max(candidate_amplitudes)
-        index_with_max_amplitude = numpy.argmax(candidate_amplitudes)
+        max_freq_amplitude = max(candidate_amplitudes)
+        index_with_max_amplitude = argmax(candidate_amplitudes)
         freq_with_max_amplitude = index_with_max_amplitude / duration
         if freq_with_max_amplitude >= min_freq and freq_with_max_amplitude <= max_freq:
             break

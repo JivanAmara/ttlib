@@ -16,7 +16,7 @@ setup(
     packages=['ttlib'],
     package_data={
         'ttlib': [
-            'requirements.txt',
+            'requirements.txt', 'consensus_predictor.p',
         ],
     },
     description='Python library for recognizing the tone of a mandarin syllable',

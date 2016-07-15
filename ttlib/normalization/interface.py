@@ -9,11 +9,11 @@ import scipy.io.wavfile
 from tempfile import NamedTemporaryFile
 import sndhdr
 import taglib
-import mutagen
+import mutagen.mp3
 from subprocess import Popen
 from logging import getLogger
-from Tkinter import Tk
-from tkSnack import initializeSnack, Sound
+from tkinter import Tk
+from tkSnack3 import initializeSnack, Sound
 
 root = Tk()
 initializeSnack(root)
@@ -21,27 +21,22 @@ initializeSnack(root)
 logger = getLogger(__name__)
 
 
-def normalize_pipeline(audio_sample_path):
+def normalize_pipeline(audio_sample_path, normalized_audio_path):
     ''' | *brief*: Creates a normalized wav file for the file located at *audio_sample_path*.
         | *return*: Absolute path to the new normalized file.
     '''
     with open(audio_sample_path, 'rb') as f:
-        sample_rate, wave_data = scipy.io.wavfile.read(f)
-
         wav_file = NamedTemporaryFile(suffix='.wav', delete=False)
         normal_volume_wav = NamedTemporaryFile(suffix='.wav', delete=False)
-        stripped_silence_wav = NamedTemporaryFile(suffix='.wav', delete=False)
 
         convert_wav(audio_sample_path, wav_file.name)
         normalize_volume(wav_file.name, normal_volume_wav.name)
-        strip_silence(normal_volume_wav.name, stripped_silence_wav.name)
+        strip_silence(normal_volume_wav.name, normalized_audio_path)
 
         if wav_file:
             os.unlink(wav_file.name)
         if normal_volume_wav:
             os.unlink(normal_volume_wav.name)
-
-        return stripped_silence_wav.name
 
 def convert_wav(infile_path, outfile_path):
     ''' *brief*: Converts *infile_path* to a single channel wav file with sampling rate of 44100
@@ -57,12 +52,14 @@ def convert_wav(infile_path, outfile_path):
         # -ac is audio channel count
         # -ar is audio sample rate
         cmd = [
-            'avconv', '-i', infile_path,
+            'avconv', '-y', '-i', infile_path,
             '-ac', '1', '-ar', '44100', outfile_path
         ]
+        import sys
         with open(os.devnull) as nullfile:
-#             retcode = subprocess.call(cmd, stdout=nullfile, stderr=nullfile)
-            p = Popen(cmd, stdout=nullfile, stderr=nullfile)
+#             p = Popen(cmd, stdout=nullfile, stderr=nullfile)
+            p = Popen(cmd, stdout=sys.stdout, stderr=sys.stdout)
+
         p.wait()
         if p.returncode != 0:
             msg = '\nretcode {} for:\n{}'.format(p.returncode, ' '.join(cmd))
@@ -150,8 +147,7 @@ def get_file_metadata(filepath):
     except IndexError:
         file_extension = None
 
-    with open(filepath, 'rb') as f:
-        audio_details = sndhdr.whathdr_stringio(f)
+    audio_details = sndhdr.whathdr(filepath)
 
     if audio_details:
         (type, sample_rate, channels, frames, bits_per_sample) = audio_details
