@@ -10,10 +10,10 @@ with open('README.rst', 'r') as rmf:
 
 setup(
     name="ttlib",
-    version="0.0.0",
+    version="0.1.0",
     author="Jivan Amara",
     author_email="Development@JivanAmara.net",
-    packages=['ttlib'],
+    packages=['ttlib', 'ttlib.characteristics', 'ttlib.normalization', 'ttlib.predictors'],
     package_data={
         'ttlib': [
             'requirements.txt', 'consensus_predictor.p',
