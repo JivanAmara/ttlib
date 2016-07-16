@@ -28,9 +28,9 @@ Typical Usage:
     from ttlib.recognizer import ToneRecognizer
 
     normalized_audio_path = '/path/to/normalized_audio_sample.mp3'
-    ttlib.normalization.interface.normalize_pipeline('/path/to/audio_sample.mp3', normalized_audio_path)
+    normalize_pipeline('/path/to/audio_sample.mp3', normalized_audio_path)
     sample_rate, wave_data = scipy.io.wavfile.read(normalized_sample_path)
-    sample_characteristics = generate_all_characteristics(normalized_sample)
+    sample_characteristics = generate_all_characteristics(wave_data, sample_rate)
 
     tr = ToneRecognizer()
     tone = tr.get_tone(sample_characteristics)
