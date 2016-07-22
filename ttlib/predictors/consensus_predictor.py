@@ -7,9 +7,12 @@ and uses them to generate a consensus prediction
 by totaling the confidence values given by each predictor.
 '''
 from __future__ import print_function
+
 from _collections import defaultdict
-import operator
+from bisect import bisect
 import logging
+import operator
+
 from numpy import median
 
 
@@ -21,6 +24,8 @@ class ConsensusPredictor(object):
     #    during training.
     fail_scores = []
     success_scores = []
+    unknown_count = 0
+    score_cutoff = 0
 
     # If __init__() kwarg 'log_contributions' is True, This contains information
     #    about which predictors contributed how much score to each failure and success.
@@ -72,12 +77,32 @@ class ConsensusPredictor(object):
     def _train(self, training_data, helpfulness_cutoff):
         ''' *training_data* should be of the form: {(id, tone): {charname: charvalue}}
         '''
+        # --- Determine the lower cutoff for prediction scores.  This is the value below which
+        #    the number of failed predictions starts to exceed the number of accurate predictions.
         for (id, tone), characteristic_values in training_data.items():
             predicted_tone, prediction_score = self.predict(characteristic_values)
             if predicted_tone is not None and predicted_tone != tone:
-                self.fail_scores.append(prediction_score)  # *** Is this used?
+                self.fail_scores.append(prediction_score)
             elif predicted_tone is not None and predicted_tone == tone:
                 self.success_scores.append(prediction_score)
+            elif predicted_tone is None:
+                self.unknown_count += 1
+
+        # This supports a binary search of success_scores to find the value which meets our
+        #    criteria
+
+        # Scan left through the list of success scores until we find a value below which
+        #    there are the same number of successes & failures.
+        for i in range(len(self.success_scores) - 1, -1, -1):
+            cutoff = self.success_scores[i]
+            fail_index = bisect(self.fail_scores, cutoff)
+            if len(self.fail_scores[:fail_index]) >= len(self.success_scores):
+                break
+
+        self.score_cutoff = cutoff
+        nignored_with_cutoff = len(self.fail_scores[:fail_index]) + len(self.fail_scores[:i])
+        print('Ignoring scores <= {:.4f}'.format(self.score_cutoff))
+        print('({} scores out of {})'.format(nignored_with_cutoff, len(training_data)))
 
         nno_prediction = 0
         nbad_prediction = 0
@@ -187,6 +212,11 @@ class ConsensusPredictor(object):
 
         # Claim agnostic if there's a tie for the predicted score
         if prediction_score == second_highest:
+            predicted_tone = None
+            prediction_score = None
+
+        # Claim agnostic if the score is below the cutoff
+        if prediction_score <= self.score_cutoff:
             predicted_tone = None
             prediction_score = None
 
