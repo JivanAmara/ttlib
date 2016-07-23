@@ -136,7 +136,10 @@ def strip_silence(infile_path, outfile_path):
     finally:
         # tkSnack is a c library and the memory it uses won't get garbage collected.
         # Release the memory it's using with this.
-        s.destroy()
+        try:
+            s.destroy()
+        except:
+            pass
 
 def get_file_metadata(filepath):
     """ *brief*: Returns the file extension, sample rate, and audio length for the audio file located at
