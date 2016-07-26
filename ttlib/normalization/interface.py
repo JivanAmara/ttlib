@@ -156,8 +156,12 @@ def get_file_metadata(filepath):
         (type, sample_rate, channels, frames, bits_per_sample) = audio_details
         audio_metadata = (file_extension, sample_rate, None)
     else:
-        tlinfo = taglib.File(filepath)
-        sample_rate = tlinfo.sampleRate
+        try:
+            tlinfo = taglib.File(filepath)
+            sample_rate = tlinfo.sampleRate
+        except OSError:
+            sample_rate = None
+
         try:
             audio = mutagen.mp3.MP3(filepath)
             audio_length = audio.info.length
