@@ -15,6 +15,7 @@ from logging import getLogger
 from tkinter import Tk
 from tkSnack3 import initializeSnack, Sound
 
+DEBUG = os.environ.get('DEBUG', False)
 root = Tk()
 initializeSnack(root)
 
@@ -37,6 +38,33 @@ def normalize_pipeline(audio_sample_path, normalized_audio_path):
             os.unlink(wav_file.name)
         if normal_volume_wav:
             os.unlink(normal_volume_wav.name)
+
+def convert_file_format(infile_path, outfile_path):
+    ''' *brief*: Copies *infile_path* to *outfile_path* with the format determined
+            by *outfile_path* extension.
+    '''
+    extension, sample_rate, audio_length = get_file_metadata(infile_path)
+    if extension is None:
+        raise Exception('infile_path has invalid audio extension')
+
+    # -ac is audio channel count
+    # -ar is audio sample rate
+    cmd = [
+        'avconv', '-y', '-i', infile_path, outfile_path
+    ]
+    import sys
+    if DEBUG:
+        p = Popen(cmd, stdout=sys.stdout, stderr=sys.stdout)
+    else:
+        with open(os.devnull) as nullfile:
+            p = Popen(cmd, stdout=nullfile, stderr=nullfile)
+
+    p.wait()
+    if p.returncode != 0:
+        msg = '\nretcode {} for:\n{}'.format(p.returncode, ' '.join(cmd))
+        logger.error(msg)
+        raise Exception(msg)
+
 
 def convert_wav(infile_path, outfile_path):
     ''' *brief*: Converts *infile_path* to a single channel wav file with sampling rate of 44100
