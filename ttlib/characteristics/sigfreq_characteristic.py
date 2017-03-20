@@ -12,6 +12,10 @@ from numpy import abs, fft
 import sys
 
 class SigFreq8(CharacteristicGenerator):
+    version = '0.0.0'
+    name = 'sigfreq8'
+    dependencies = []
+
     charversion = '0.0'
     # Eliminate values less than this times the maximum fft coefficient
     cutoff_proportion = 0.1

@@ -14,6 +14,9 @@ from logging import getLogger
 logger = getLogger(__name__)
 
 class MaxVolume8(CharacteristicGenerator):
+    version = '0.0.0'
+    name = 'maxvolume8'
+    dependencies = []
 
     @classmethod
     def calculate(cls, wave_data, sample_rate):
@@ -57,6 +60,9 @@ class MaxVolume8(CharacteristicGenerator):
         print()
 
 class MaxVolumeChange8(CharacteristicGenerator):
+    version = '0.0.0'
+    name = 'maxvolumechange8'
+    dependencies = ['maxvolume8']
 
     @classmethod
     def calculate(cls, wave_data, sample_rate):

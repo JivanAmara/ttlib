@@ -16,6 +16,9 @@ from logging import getLogger
 logger = getLogger(__name__)
 
 class WeightedFreq28(CharacteristicGenerator):
+    version = '0.0.0'
+    name = 'weightedfreq28'
+    dependencies = []
 
     @classmethod
     def calculate(cls, wave_data, sample_rate):
@@ -122,6 +125,9 @@ class WeightedFreq28(CharacteristicGenerator):
         print('done')
 
 class WeightedFreq28Change(CharacteristicGenerator):
+    version = '0.0.0'
+    name = 'weightedfreq28change'
+    dependencies = ['weightedfreq28']
 
     @classmethod
     def calculate(cls, wave_data, sample_rate):

@@ -20,6 +20,9 @@ root = Tk()
 initializeSnack(root)
 
 class AveragePitch(CharacteristicGenerator):
+    version = '0.0.0'
+    name = 'averagepitch'
+    dependencies = []
 
     @classmethod
     def calculate(cls, wave_data, sample_rate):
@@ -74,6 +77,9 @@ class AveragePitch(CharacteristicGenerator):
         sys.stdout.flush()
 
 class AveragePitchChange(CharacteristicGenerator):
+    version = '0.0.0'
+    name = 'averagepitchchange'
+    dependencies = ['averagepitch']
 
     @classmethod
     def calculate(cls, wave_data, sample_rate):

@@ -39,6 +39,9 @@ def get_frequency_with_peak_amplitude(wave_data, sampling_rate, min_freq=150, ma
     return freq_with_max_amplitude
 
 class MaxFreq8(CharacteristicGenerator):
+    version = '0.0.0'
+    dependencies = []
+    name = 'maxfreq8'
 
     @classmethod
     def calculate(cls, wave_data, sample_rate):
@@ -109,6 +112,9 @@ class MaxFreq8(CharacteristicGenerator):
         print('done')
 
 class MaxFreqChange8(CharacteristicGenerator):
+    version = '0.0.0'
+    name = 'maxfreqchange8'
+    dependencies = ['maxfreq8']
 
     @classmethod
     def calculate(cls, wave_data, sample_rate):

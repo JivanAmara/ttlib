@@ -20,6 +20,9 @@ root = Tk()
 initializeSnack(root)
 
 class AverageFormant12(CharacteristicGenerator):
+    version = '0.0.0'
+    name = 'averageformant12'
+    dependencies = []
 
     @classmethod
     def calculate(cls, wave_data, sample_rate):
@@ -97,6 +100,9 @@ class AverageFormant12(CharacteristicGenerator):
         sys.stdout.flush()
 
 class AverageFormant1Change(CharacteristicGenerator):
+    version = '0.0.0'
+    name = 'averageformant1change'
+    dependencies = ['averageformant12', ]
 
     @classmethod
     def calculate(cls, wave_data, sample_rate):
@@ -155,6 +161,8 @@ class AverageFormant1Change(CharacteristicGenerator):
         sys.stdout.flush()
 
 class AverageFormant2Change(CharacteristicGenerator):
+    name = 'averageformant2change'
+    dependencies = ['averageformant12', ]
 
     @classmethod
     def calculate(cls, wave_data, sample_rate):
