@@ -161,6 +161,7 @@ class AverageFormant1Change(CharacteristicGenerator):
         sys.stdout.flush()
 
 class AverageFormant2Change(CharacteristicGenerator):
+    version = '0.0.0'
     name = 'averageformant2change'
     dependencies = ['averageformant12', ]
 
