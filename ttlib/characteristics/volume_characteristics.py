@@ -24,7 +24,7 @@ class MaxVolume8(CharacteristicGenerator):
         m = max(wave_data)
         maxvolumes['maxvolume'] = m
 
-        segment_ends = [ (len(wave_data) * i / 8) for i in range(0, 9) ]
+        segment_ends = [ (len(wave_data) * i // 8) for i in range(0, 9) ]
         for i in range(8):
             m = max(wave_data[segment_ends[i]:segment_ends[i + 1]])
             maxvolumes['maxvolume{}8'.format(i + 1)] = m

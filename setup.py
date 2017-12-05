@@ -10,7 +10,7 @@ with open('README.rst', 'r') as rmf:
 
 setup(
     name="ttlib",
-    version="0.2.4",
+    version="0.2.4a1",
     author="Jivan Amara",
     author_email="Development@JivanAmara.net",
     packages=['ttlib', 'ttlib.characteristics', 'ttlib.normalization', 'ttlib.predictors'],

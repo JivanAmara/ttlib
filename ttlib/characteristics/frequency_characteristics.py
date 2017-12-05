@@ -22,7 +22,7 @@ def get_frequency_with_peak_amplitude(wave_data, sampling_rate, min_freq=150, ma
     cprint('rate: {}, len(data): {}, duration: {}s'.format(sampling_rate, len(wave_data), duration))
     freq_amplitudes = abs(fft.fft(wave_data))
     # Due to symmetry of fft transform on signal, only consider half of result.
-    candidate_amplitudes = freq_amplitudes[:len(freq_amplitudes + 1) / 2]
+    candidate_amplitudes = freq_amplitudes[:len(freq_amplitudes + 1) // 2]
     # Zero-out frequencies below min or above max so they aren't considered.
     while True:
         max_freq_amplitude = max(candidate_amplitudes)
@@ -50,7 +50,7 @@ class MaxFreq8(CharacteristicGenerator):
             *return*: Dictionary of the form {<characteristic_name>: <characteristic_value>, ...}
         '''
         sample_count = len(wave_data)
-        segment_ends = [ (sample_count * i / 8) for i in range(0, 9) ]
+        segment_ends = [ (sample_count * i // 8) for i in range(0, 9) ]
         if segment_ends[-1] != sample_count:
             msg = 'segmentation logic faulty, {} != {}'.format(segment_ends[-1], sample_count)
             raise Exception(msg)

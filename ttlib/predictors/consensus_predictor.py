@@ -216,7 +216,7 @@ class ConsensusPredictor(object):
             prediction_score = None
 
         # Claim agnostic if the score is below the cutoff
-        if prediction_score <= self.score_cutoff:
+        if prediction_score is not None and prediction_score <= self.score_cutoff:
             predicted_tone = None
             prediction_score = None
 

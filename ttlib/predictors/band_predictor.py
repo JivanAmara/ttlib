@@ -7,13 +7,16 @@ from ttlib.predictors.predictor_base import PredictorBase
 logger = getLogger(__name__)
 
 class BandPredictor(PredictorBase):
+    ''' This predictor uses a simple concept of identifying the minimum and maximum values that a characteristic
+        falls within for each tone.  That range of values [min, max] is the valid "band".
+    '''
     name = 'bandpredictor'
 
     def __init__(self, charname, training_data=None):
-        ''' | *brief*: Initialize this predictor.  If tonedata is provided it should be an
+        ''' | *brief*: Initialize this predictor.  If training_data is provided it should be an
             |    iterable of 2-tuples (<charvalue>, <tone>) which has already been randomly
             |    ordered.
-            |    If it isn't provided it will be extracted from the Characteristic mode
+            |    If it isn't provided it will be extracted from the Characteristic model
             |    using charname.
             | *training_proportion*: The proportion of data to use for training.  The
             |    remainder is used for testing.
